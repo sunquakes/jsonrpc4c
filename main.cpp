@@ -1,8 +1,8 @@
-#include "server.h"
+#include "server/tcp.h"
 
 int main()
 {
-    jsonrpc4c::Server server(9000);
+    jsonrpc4c::TcpServer server(9002);
     server.start();
     return 0;
 }

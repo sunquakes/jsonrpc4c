@@ -3,6 +3,6 @@ project(jsonrpc4c)
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_executable(jsonrpc4c_e main.cpp server.cpp)
+add_executable(jsonrpc4c_e main.cpp server/tcp.cpp)
 
-add_library(jsonrpc4c main.cpp main.h server.cpp server.h)
+add_library(jsonrpc4c main.cpp main.h server/tcp.cpp server/tcp.h)
