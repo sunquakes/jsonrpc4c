@@ -3,27 +3,27 @@
 
 #include <iostream>
 #include "server.h"
-
-struct Option {
-    std::string packageEof;
-    int packageMaxLength;
-};
+#include "properties.h"
 
 namespace jsonrpc4c{
     class TcpServer : public Server {
     private:
-        Option option;
+        TcpOption option;
 
-        void handler(int clientSocket);
+        void Handler(int clientSocket);
+
+        std::atomic<bool> isClosed;
+
+        int socketPair[2];
 
     public:
         TcpServer(int port);
 
         ~TcpServer();
 
-        void start();
+        void Start();
 
-        void setOption(Option option) {
+        void SetOption(TcpOption option) {
             this->option = option;
         };
     };

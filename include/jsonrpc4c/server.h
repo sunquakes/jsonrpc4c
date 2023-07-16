@@ -8,10 +8,10 @@ namespace jsonrpc4c {
 
         int port;
 
-        void handler(int clientSocket);
+        void Handler(int clientSocket);
 
     public:
-        void start();
+        void Start();
     };
 };
 

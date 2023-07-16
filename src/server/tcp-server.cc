@@ -1,4 +1,4 @@
-#include "tcp-server.h"
+#include "jsonrpc4c/tcp-server.h"
 #include <iostream>
 #include <sys/types.h>
 #include <unistd.h>
@@ -13,18 +13,25 @@ using namespace jsonrpc4c;
 
 TcpServer::TcpServer(int port) {
     this->port = port;
-    this->option = Option{"\r\n", 1024 * 1024 * 2};
+    this->option = TcpOption{"\r\n", 1024 * 1024 * 2};
 }
 
 TcpServer::~TcpServer() {
     // Close the server socket
+    char buf[1] = {0};
+    write(socketPair[0], buf, sizeof(buf));
+    close(socketPair[0]);
+    close(socketPair[1]);
+    isClosed = true;
     close(serverSocket);
 }
 
-void TcpServer::start() {
+void TcpServer::Start() {
     // Create the server socket
     int serverSocket = socket(AF_INET, SOCK_STREAM, 0);
     this->serverSocket = serverSocket;
+
+    isClosed = false;
 
     // Bind the server socket to a specific address and port
     struct sockaddr_in serverAddress{};
@@ -37,7 +44,11 @@ void TcpServer::start() {
     // Listen for incoming connections
     listen(serverSocket, 5); // Maximum 5 pending connections
 
-    while (true) {
+    if (socketpair(AF_UNIX, SOCK_STREAM, 0, socketPair) == -1) {
+        // TODO: throw exception
+    }
+
+    while (!isClosed) {
         // Accept client connections
         struct sockaddr_in clientAddress{};
         socklen_t clientAddressLength = sizeof(clientAddress);
@@ -46,21 +57,21 @@ void TcpServer::start() {
         int clientSocket = accept(serverSocket, (struct sockaddr *) &clientAddress, &clientAddressLength);
 
         // Spawn a new thread to handle the client communication
-        std::thread clientThread(&TcpServer::handler, this, clientSocket);
+        std::thread clientThread(&TcpServer::Handler, this, clientSocket);
         clientThread.detach();
     }
 }
 
-void TcpServer::handler(int clientSocket) {
-    bool isClose = false;
+void TcpServer::Handler(int clientSocket) {
+    std::atomic<bool> isClientClosed;
     std::cout << "The client connected" << std::endl;
 
     char buf[4096];
     std::vector<char> eofb;
     eofb.assign(option.packageEof.begin(), option.packageEof.end());
     int eofl = eofb.size();
-    outer:
-    while (!isClose) {
+
+    while (!isClosed && !isClientClosed) {
         std::vector<char> data;
         while (true) {
             // clear buffer
@@ -73,7 +84,7 @@ void TcpServer::handler(int clientSocket) {
             }
             if (bytesRecv == 0) {
                 std::cout << "The client disconnected" << std::endl;
-                isClose = true;
+                isClientClosed = true;
                 break;
             }
             std::copy(buf, buf + bytesRecv, std::back_inserter(data));

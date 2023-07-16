@@ -3,8 +3,21 @@ project(jsonrpc4c)
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_executable(jsonrpc4c_e src/main.cc src/server/tcp-server.cc)
+add_library(jsonrpc4c)
 
-add_library(jsonrpc4c src/main.cc src/main.h src/server/tcp-server.cc src/server/tcp-server.h src/server/server.h src/client/tcp-client.cc src/client/tcp-client.h)
+target_sources(jsonrpc4c PUBLIC
+        include/jsonrpc4c/properties.h
+        include/jsonrpc4c/server.h
+        include/jsonrpc4c/client.h
+        include/jsonrpc4c/tcp-server.h
+        include/jsonrpc4c/tcp-client.h
+        src/server/tcp-server.cc
+        src/client/tcp-client.cc
+        )
+
+set(jsonrpc4c_build_include_dirs
+        "${CMAKE_CURRENT_SOURCE_DIR}/include"
+        "${CMAKE_CURRENT_SOURCE_DIR}")
+include_directories(${jsonrpc4c_build_include_dirs})
 
 add_subdirectory(test)
