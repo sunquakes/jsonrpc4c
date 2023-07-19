@@ -3,7 +3,7 @@ project(jsonrpc4c)
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_library(jsonrpc4c)
+add_library(jsonrpc4c include/jsonrpc4c/tcp-client-pool.h src/client/tcp-client-pool.cc include/jsonrpc4c/discovery.h include/jsonrpc4c/string.h)
 
 target_sources(jsonrpc4c PUBLIC
         include/jsonrpc4c/properties.h

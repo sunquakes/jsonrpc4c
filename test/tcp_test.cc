@@ -12,6 +12,10 @@ TEST(TcpTestSuite, Test1) {
     std::thread start(startServer, server);
     std::this_thread::sleep_for(std::chrono::seconds(2));
     jsonrpc4c::TcpClient client("127.0.0.1", 9000);
+    int a = 1;
+    int b;
+    client.Call<int>("test", &a, &b);
+    ASSERT_EQ(a, b);
     std::this_thread::sleep_for(std::chrono::seconds(2));
     delete server;
     start.join();

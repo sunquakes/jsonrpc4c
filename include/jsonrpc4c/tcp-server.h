@@ -8,13 +8,13 @@
 namespace jsonrpc4c{
     class TcpServer : public Server {
     private:
-        TcpOption option;
+        TcpOption option_;
+
+        std::atomic<bool> isClosed_;
+
+        int socketPair_[2];
 
         void Handler(int clientSocket);
-
-        std::atomic<bool> isClosed;
-
-        int socketPair[2];
 
     public:
         TcpServer(int port);
@@ -24,7 +24,7 @@ namespace jsonrpc4c{
         void Start();
 
         void SetOption(TcpOption option) {
-            this->option = option;
+            this->option_ = option;
         };
     };
 }

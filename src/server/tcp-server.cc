@@ -13,16 +13,16 @@ using namespace jsonrpc4c;
 
 TcpServer::TcpServer(int port) {
     this->port = port;
-    this->option = TcpOption{"\r\n", 1024 * 1024 * 2};
+    this->option_ = TcpOption{"\r\n", 1024 * 1024 * 2};
 }
 
 TcpServer::~TcpServer() {
     // Close the server socket
     char buf[1] = {0};
-    write(socketPair[0], buf, sizeof(buf));
-    close(socketPair[0]);
-    close(socketPair[1]);
-    isClosed = true;
+    write(socketPair_[0], buf, sizeof(buf));
+    close(socketPair_[0]);
+    close(socketPair_[1]);
+    isClosed_ = true;
     close(serverSocket);
 }
 
@@ -31,7 +31,7 @@ void TcpServer::Start() {
     int serverSocket = socket(AF_INET, SOCK_STREAM, 0);
     this->serverSocket = serverSocket;
 
-    isClosed = false;
+    isClosed_ = false;
 
     // Bind the server socket to a specific address and port
     struct sockaddr_in serverAddress{};
@@ -44,11 +44,11 @@ void TcpServer::Start() {
     // Listen for incoming connections
     listen(serverSocket, 5); // Maximum 5 pending connections
 
-    if (socketpair(AF_UNIX, SOCK_STREAM, 0, socketPair) == -1) {
+    if (socketpair(AF_UNIX, SOCK_STREAM, 0, socketPair_) == -1) {
         // TODO: throw exception
     }
 
-    while (!isClosed) {
+    while (!isClosed_) {
         // Accept client connections
         struct sockaddr_in clientAddress{};
         socklen_t clientAddressLength = sizeof(clientAddress);
@@ -62,23 +62,27 @@ void TcpServer::Start() {
     }
 }
 
+/**
+ * Handler the client socket.
+ * @param clientSocket
+ */
 void TcpServer::Handler(int clientSocket) {
     std::atomic<bool> isClientClosed;
     std::cout << "The client connected" << std::endl;
 
     char buf[4096];
     std::vector<char> eofb;
-    eofb.assign(option.packageEof.begin(), option.packageEof.end());
+    eofb.assign(option_.packageEof.begin(), option_.packageEof.end());
     int eofl = eofb.size();
 
-    while (!isClosed && !isClientClosed) {
+    while (!isClosed_ && !isClientClosed) {
         std::vector<char> data;
         while (true) {
             // clear buffer
             memset(buf, 0, 4096);
 
             // wait for a message
-            int bytesRecv = recv(clientSocket, buf, option.packageMaxLength, 0);
+            int bytesRecv = recv(clientSocket, buf, option_.packageMaxLength, 0);
             if (bytesRecv == -1) {
                 std::cerr << "There was a connection issue." << std::endl;
             }

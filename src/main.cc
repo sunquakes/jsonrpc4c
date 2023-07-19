@@ -3,6 +3,6 @@
 int main()
 {
     jsonrpc4c::TcpServer server(9002);
-    server.start();
+    server.Start();
     return 0;
 }
