@@ -8,10 +8,10 @@ void startServer(jsonrpc4c::TcpServer* server) {
 }
 
 TEST(TcpTestSuite, Test1) {
-    jsonrpc4c::TcpServer* server = new jsonrpc4c::TcpServer(9000);
+    jsonrpc4c::TcpServer* server = new jsonrpc4c::TcpServer(9003);
     std::thread start(startServer, server);
     std::this_thread::sleep_for(std::chrono::seconds(2));
-    jsonrpc4c::TcpClient client("127.0.0.1", 9000);
+    jsonrpc4c::TcpClient client("127.0.0.1", 9003);
     int a = 1;
     int b;
     client.Call<int>("test", &a, &b);
