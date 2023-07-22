@@ -1,6 +1,8 @@
 #ifndef JSONRPC4C_SERVER_H
 #define JSONRPC4C_SERVER_H
 
+#include <iostream>
+
 namespace jsonrpc4c {
     class Server {
     protected:
@@ -12,7 +14,13 @@ namespace jsonrpc4c {
 
     public:
         void Start();
+
+        inline void Handler(std::string body);
     };
+
+    void Server::Handler(std::string body) {
+
+    }
 };
 
 #endif //JSONRPC4C_SERVER_H

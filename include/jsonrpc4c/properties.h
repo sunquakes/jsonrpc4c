@@ -18,6 +18,13 @@ namespace jsonrpc4c {
         int minIdle;
         int maxActive;
     };
+
+    struct Request {
+        std::string id;
+        std::string jsonrpc;
+        std::string method;
+        void *params;
+    };
 };
 
 #endif //JSONRPC4C_PROPERTIES_H
