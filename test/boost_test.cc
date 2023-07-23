@@ -17,7 +17,7 @@ bool FoundObjectMethod(C &c, std::string method) {
     return found;
 }
 
-template<class C, typename R, typename... A>
+template<class C, typename... A>
 void *CallObjectMethod(C &c, std::string method, A... args) {
     using Fd = boost::describe::describe_members<C,
             boost::describe::mod_public | boost::describe::mod_function>;
@@ -26,7 +26,7 @@ void *CallObjectMethod(C &c, std::string method, A... args) {
 
     boost::mp11::mp_for_each<Fd>([&](auto D) {
         if (method == D.name) {
-            R (C::*pmf)(A...) = D.pointer;
+            auto (C::*pmf)(A...) = D.pointer;
             auto res = (c.*pmf)(args...);
             result = &res;
         }
@@ -50,6 +50,6 @@ TEST(BoostTestSuite, TestFoundObjectMethod) {
 
 TEST(BoostTestSuite, TestCallObjectMethod) {
     Object obj;
-    int result = *(reinterpret_cast<int *>(CallObjectMethod<Object, int, int>(obj, "add", 1, 1)));
+    int result = *(reinterpret_cast<int *>(CallObjectMethod(obj, "add", 1, 1)));
     ASSERT_EQ(result, 2);
 }
