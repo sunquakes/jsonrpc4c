@@ -71,8 +71,10 @@ struct Object {
     }
 };
 
-BOOST_DESCRIBE_STRUCT(Object, (), (Greet, Add))
+#define JSONRPC4C_REGISTER(C, Bases, Members) \
+    BOOST_DESCRIBE_STRUCT(C, Bases, Members)
 
+JSONRPC4C_REGISTER(Object, (), (Greet, Add))
 
 TEST(BoostTestSuite, TestFoundObjectMethod) {
     Object obj;
