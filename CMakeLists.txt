@@ -17,9 +17,6 @@ target_sources(jsonrpc4c PUBLIC
         src/server/tcp-server.cc
         src/client/tcp-client.cc
         src/client/tcp-client-pool.cc
-        # boost
-        include/boost/describe.hpp
-        include/boost/mp11.hpp
         )
 
 set(jsonrpc4c_build_include_dirs
