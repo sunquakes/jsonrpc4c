@@ -7,7 +7,7 @@ void startServer(jsonrpc4c::TcpServer* server) {
     server->Start();
 }
 
-TEST(TcpTestSuite, Test1) {
+TEST(TcpTestSuite, CommunicationTest) {
     jsonrpc4c::TcpServer* server = new jsonrpc4c::TcpServer(9003);
     std::thread start(startServer, server);
     std::this_thread::sleep_for(std::chrono::seconds(2));
@@ -19,6 +19,4 @@ TEST(TcpTestSuite, Test1) {
     std::this_thread::sleep_for(std::chrono::seconds(2));
     delete server;
     start.join();
-    // Test assertions
-    ASSERT_EQ(2 + 2, 4);
 }

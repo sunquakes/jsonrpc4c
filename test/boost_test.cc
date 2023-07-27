@@ -11,7 +11,7 @@ template<class C1, class C2, class R, class... A, std::size_t... I>
 boost::json::value
 CallImpl_(C1 &c1, R (C2::*pmf)(A...), boost::json::array const &args,
           std::index_sequence<I...>) {
-    return boost::json::value_from((c1.*pmf)(boost::json::value_to<boost::remove_cv_ref_t<A> >(args[I])...));
+    return boost::json::value_from((c1.*pmf)(boost::json::value_to<boost::remove_cv_ref_t<A>>(args[I])...));
 }
 
 template<class C1, class C2, class R, class... A>
@@ -69,21 +69,52 @@ struct Object {
     int Add(int x, int y) {
         return x + y;
     }
+
+
 };
 
-#define JSONRPC4C_REGISTER(C, Bases, Members) \
-    BOOST_DESCRIBE_STRUCT(C, Bases, Members)
+#define JSONRPC4C_REGISTER(C, Members) \
+    BOOST_DESCRIBE_STRUCT(C, (), Members)
 
-JSONRPC4C_REGISTER(Object, (), (Greet, Add))
+JSONRPC4C_REGISTER(Object, (Greet, Add))
 
-TEST(BoostTestSuite, TestFoundObjectMethod) {
+TEST(BoostTestSuite, FoundObjectMethodTest) {
     Object obj;
     ASSERT_TRUE(Found<Object>(obj, "Add"));
     ASSERT_FALSE(Found<Object>(obj, "Sub"));
 }
 
-TEST(BoostTestSuite, TestCallObjectMethod) {
+TEST(BoostTestSuite, CallObjectMethodTest) {
     Object obj;
     ASSERT_EQ(Call(obj, "Greet", {"World"}), "Hello, World!");
     ASSERT_EQ(Call(obj, "Add", {1, 2}), 3);
+}
+
+TEST(BoostTestSuite, JsonTest) {
+    std::string body = "{\"id\":\"1604283212\", \"jsonrpc\":\"2.0\", \"method\":\"IntRpc/Add\", \"params\": [1, 6]}";
+    using namespace boost::json;
+    object object = parse(body).as_object();
+    ASSERT_EQ(object["jsonrpc"], "2.0");
+    ASSERT_EQ(object["id"], "1604283212");
+
+    // Test call the method using the array params
+    Object obj;
+    ASSERT_EQ(Call(obj, "Add", object["params"].as_array()), 7);
+}
+
+struct F {
+    std::map<std::string, std::string>
+    Join(std::map<std::string, std::string> b, std::map<std::string, std::string> c) {
+        return std::map < std::string, std::string > {{"name", b.at("name") + " " + c.at("name")}};
+    }
+};
+
+JSONRPC4C_REGISTER(F, (Join))
+
+TEST(BoostTestSuite, ComplexJsonTest) {
+    std::string body = "{\"id\":\"1604283212\", \"jsonrpc\":\"2.0\", \"method\":\"IntRpc/Add\", \"params\": [{\"name\":\"Hello\"}, {\"name\":\"World\"}]}";
+    using namespace boost::json;
+    F f;
+    object object = parse(body).as_object();
+    ASSERT_EQ(Call(f, "Join", object["params"].as_array()).at("name"), "Hello World");
 }
